@@ -365,7 +365,7 @@ class Connection:
          (client_id, client_secret)
         """
         if auth_flow_type == 'public':  # allow client id only for public flow
-            if isinstance(credentials, str): 
+            if isinstance(credentials, str):
                 credentials = (credentials,)
             if not isinstance(credentials, tuple) or len(credentials) != 1 or (not credentials[0]):
                 raise ValueError('Provide client id only for public flow credentials')
@@ -427,7 +427,7 @@ class Connection:
             else:
                 proxy_uri = "{}:{}".format(proxy_server,
                                             proxy_port)
-            
+
             if proxy_http_only is False:
                 self.proxy = {
                     "http": "http://{}".format(proxy_uri),
@@ -675,7 +675,7 @@ class Connection:
                 time.sleep(sleep_for / 1000)  # sleep needs seconds
         self._previous_request_at = time.time()
 
-    def _internal_request(self, request_obj, url, method, **kwargs):
+    def _internal_request(self, request_obj, url, method, immutable_id=True, **kwargs):
         """ Internal handling of requests. Handles Exceptions.
 
         :param request_obj: a requests session.
@@ -702,6 +702,13 @@ class Connection:
 
         if self.timeout is not None:
             kwargs['timeout'] = self.timeout
+
+        if immutable_id:
+            if kwargs.get('headers'):
+                kwargs['headers']['Prefer'] = "IdType=\"ImmutableId\""
+            else:
+                kwargs['headers'] = {}
+                kwargs['headers']['Prefer'] = "IdType=\"ImmutableId\""
 
         kwargs.setdefault("verify", self.verify_ssl)
 
